@@ -1,0 +1,28 @@
+dim=2000;
+iter=1000;
+rho = 0.6; % deve essere < 1
+%M = randn(dim, dim);
+%p = max(abs(eig(M)));
+%M = M / p;              % autovalori in B(0,1)
+%X = eye(dim) + rho * M;
+X=gallery('grcar',dim);
+b=randn(dim,1);
+res_gmres = zeros(iter, 1);
+res_sgmres1 = zeros(iter, 1);
+res_sgmres2 = zeros(iter, 1);
+for i=50:iter
+   res_gmres(i)=norm(X*gmres_(X,b,i)-b);
+   res_sgmres1(i)=norm(X*SSgmres_(X,b,i,10)-b);
+   res_sgmres2(i)=norm(X*SFgmres_(X,b,i,20)-b);
+end
+idx = 50:iter;
+figure;
+plot(idx, res_gmres(idx), '-', 'LineWidth', 1.5); hold on;
+plot(idx, res_sgmres1(idx), '-', 'LineWidth', 1.5);
+plot(idx, res_sgmres2(idx), '-', 'LineWidth', 1.5);
+% Aggiunta etichette e legenda
+xlabel('Numero di iterazioni');
+ylabel('Norma del residuo');
+legend('GMRES', 'S-GMRES gaussiano', 'S-GMRES SRFT', 'Location', 'northeast');
+grid on;
+set(gca, 'YScale', 'log');
