@@ -1,0 +1,41 @@
+function [xl]= SSgmres_(A,b,k,coeff)
+
+n=size(A,1);
+s=2*(k+1)+1; %qui è messo il valore di S
+S=(1/sqrt(s))*randn(s,n); %la matrice gaussiana
+
+%creo la matrice V_l
+%primo vettore
+V=b/norm(b);
+%secondo vettore
+w=A*V;
+w=w-((V'*w)*V);
+v2=w/norm(w);
+V=[V v2];
+for j=1:coeff
+w=A*V(:,end);
+h1=V'*w;
+w=w-V*h1;
+vv=w/norm(w);
+V=[V vv];
+end
+if(k>coeff)
+%ora creo la matrice V ortogonalizzando con gli ultimi coeff vettori
+for i=coeff:k
+    w=A*V(:,end);
+    h=zeros(n,1);
+    for j=0:coeff-1
+        h=h+(w'*V(:,end-j))*V(:,end-j);
+    end
+    w=w-h;
+    if norm(w) < 1e-12
+    break; 
+    end
+    vk=w/norm(w);
+    V=[V vk];
+end
+end
+T=S*A*V;
+bb=S*b;
+y=T\bb;
+xl=V*y;
