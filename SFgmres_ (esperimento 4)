@@ -1,0 +1,34 @@
+function [xl]= SFgmres_(A,b,k,coeff)
+n=size(A,1);
+s=2*(k+1)+1; %qui è messo il valore di S
+omega = exp(-2i * pi / n);
+J = 0:n-1;
+O = omega .^ (J' * J);
+I = randperm(n, s);
+S=O(I,:); %la matrice
+%creo la matrice V_l
+%primo vettore
+V=b/norm(b);
+%secondo vettore
+w=A*V;
+w=w-((V'*w)*V);
+v2=w/norm(w);
+V=[V v2];
+for j=1:coeff-2
+w=A*V(:,end);
+h1=V'*w;
+w=w-V*h1;
+vv=w/norm(w);
+V=[V vv];
+end
+%ora creo la matrice V ortogonalizzando con gli ultimi coeff vettori
+for i=coeff:k
+    w=A*V(:,end);
+    w=w-(w'*V(:,end-1))*V(:,end-1)-(w'*V(:,end))*V(:,end);
+    vk=w/norm(w);
+    V=[V vk];
+end
+T=S*A*V;
+bb=S*b;
+y=T\bb;
+xl=V*y;
