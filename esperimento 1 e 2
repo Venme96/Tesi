@@ -1,30 +1,18 @@
 dim=1000;
 iter=500;
-%Qui per creare le matrici di input:
-%caso1
-
 rho = 0.6; % deve essere < 1
 M = randn(dim, dim);
 p = max(abs(eig(M)));
 M = M / p;              % autovalori in B(0,1)
 X = eye(dim) + rho * M;
-
-%caso2
 X=gallery('grcar',dim);
-
 b=randn(dim,1);
-res_gmres = zeros(iter, 1);
-res_sgmres1 = zeros(iter, 1);
-res_sgmres2 = zeros(iter, 1);
-res_sgmres3 = zeros(iter, 1);
-for i=10:iter
-   res_gmres(i)=norm(X*gmres_(X,b,i,i)-b);
-   res_sgmres1(i)=norm(X*Sgmres_(X,b,i,2)-b);
-   res_sgmres2(i)=norm(X*Sgmres_(X,b,i,5)-b);
-   res_sgmres3(i)=norm(X*Sgmres_(X,b,i,10)-b);
+res_gmres = Fastgmres_(X,b,iter);
+res_sgmres1 = FastSgmres_(X,b,iter, 2);
+res_sgmres2 = FastSgmres_(X,b,iter,5);
+res_sgmres3= FastSgmres_(X,b,iter,10);
 
-end
-idx = 10:iter;
+idx = 1:iter;
 figure;
 plot(idx, res_gmres(idx), '-', 'LineWidth', 1.5); hold on;
 plot(idx, res_sgmres1(idx), '-', 'LineWidth', 1.5);
