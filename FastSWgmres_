@@ -1,0 +1,36 @@
+function [vec]= FastSWgmres_(A,b,iter,coeff,tol)
+n=size(A,1);
+  s=coeff*(iter+1)+1; %qui è messo il valore di S
+    S=(1/sqrt(s))*randn(s,n);
+vec=zeros(iter,1);
+sb=S*b;
+%creo la matrice V_l
+%primo vettore
+V=b/norm(b);
+%secondo vettore
+w=A*V;
+w=w-((V'*w)*V);
+v2=w/norm(w);
+V=[V v2];
+sT=S*(A*V);
+%ora creo la matrice V ortogonalizzando coi primi 2 vettori
+for j=2:iter
+    %qui aggiungo una colonna alla base V
+    w=A*V(:,end);
+    w=w-(w'*V(:,end-1))*V(:,end-1)-(w'*V(:,end))*V(:,end);
+    vk=w/norm(w);
+    V=[V vk];
+    sT=[sT S*(A*vk)];
+    if cond(V)>tol
+   [Q, R, P] = qr(S*V, 0);
+   Pmat = eye(size(V,2));
+    Pmat = Pmat(:, P);
+    T = R * Pmat';     % T = R * P^T
+    V = V * inv(T);
+    sT= S*A*V;
+    end
+    %qui risolvo il sistema con la nuova base
+     %(Si può ottimizzare, c'è già)
+    y=sT\sb;
+    vec(j)=norm(A*V*y-b);
+end 
