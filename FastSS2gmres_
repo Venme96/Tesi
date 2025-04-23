@@ -1,0 +1,41 @@
+function [vec]= FastSS2gmres_(A,b,k,coeff)
+
+n=size(A,1);
+vec=zeros(k,1);
+
+s=2*(k+1)+1; %qui è messo il valore di S
+S=(1/sqrt(s))*randn(s,n); %la matrice gaussiana
+sb=S*b;
+
+%creo la matrice V_l
+%primo vettore e primo elemento dei residui
+V=b/norm(b);
+sT=S*A*V;
+y=sT\sb;
+vec(1)=norm(A*(V*y)-b);
+%il numero di vettori per cui ortogonalizzo:
+for j=2:coeff %cambiamento: min(k,coeff)
+w=A*V(:,end);
+h1=V'*w;
+w=w-V*h1;
+vv=w/norm(w);
+V=[V vv];
+sT=[sT S*(A*vv)];
+y=sT\sb;
+vec(j)=norm(A*(V*y)-b);
+end
+%ora creo la matrice V ortogonalizzando con gli ultimi coeff vettori
+%riguardare
+for i=coeff+1:k
+    w=A*V(:,end);
+    h=zeros(n,1);
+    for j=0:coeff-1
+        h=h+(w'*V(:,end-j))*V(:,end-j);
+    end
+    w=w-h;
+    vk=w/norm(w);
+    V=[V vk];
+    sT=[sT S*(A*vk)];
+    y=sT\sb;
+    vec(i)=norm((A*(V*y))-b);
+end
